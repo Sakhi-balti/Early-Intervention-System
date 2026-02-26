@@ -1,0 +1,1537 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Early Intervention System – Architecture</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap");
+
+      :root {
+        --bg: #0a0e1a;
+        --bg2: #0f1420;
+        --card: #131929;
+        --border: #1e2d45;
+        --accent: #00d4ff;
+        --accent2: #7c3aed;
+        --accent3: #10b981;
+        --accent4: #f59e0b;
+        --accent5: #ef4444;
+        --text: #e2e8f0;
+        --muted: #64748b;
+        --glow: rgba(0, 212, 255, 0.15);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Syne", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Animated grid background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 24px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 60px;
+      }
+      .header h1 {
+        font-size: clamp(24px, 4vw, 42px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1.1;
+      }
+      .header h1 span {
+        color: var(--accent);
+      }
+      .header p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-top: 12px;
+        font-family: "JetBrains Mono", monospace;
+        letter-spacing: 2px;
+      }
+
+      /* Section Labels */
+      .section-title {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 3px;
+        color: var(--accent);
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      /* ===== REAL-TIME FLOW SECTION ===== */
+      .realtime-section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 32px;
+        position: relative;
+        overflow: hidden;
+      }
+      .realtime-section::before {
+        content: "LIVE";
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: var(--accent5);
+        color: white;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 4px;
+        animation: pulse-badge 1.5s ease-in-out infinite;
+      }
+      @keyframes pulse-badge {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .flow-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--accent3);
+      }
+      .flow-subtitle {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 28px;
+      }
+
+      /* Attendance Real-time flow */
+      .rt-flow {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .rt-step {
+        flex-shrink: 0;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        min-width: 140px;
+        text-align: center;
+        position: relative;
+        transition: border-color 0.3s;
+      }
+      .rt-step:hover {
+        border-color: var(--accent);
+      }
+      .rt-step.highlight-green {
+        border-color: var(--accent3);
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+      }
+      .rt-step.highlight-blue {
+        border-color: var(--accent);
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+      }
+      .rt-step.highlight-orange {
+        border-color: var(--accent4);
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+      }
+      .rt-step.highlight-red {
+        border-color: var(--accent5);
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+      }
+      .rt-step.highlight-purple {
+        border-color: var(--accent2);
+        box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+      }
+
+      .rt-step-icon {
+        font-size: 24px;
+        margin-bottom: 6px;
+      }
+      .rt-step-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .rt-step-desc {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 3px;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .rt-arrow {
+        flex-shrink: 0;
+        width: 44px;
+        text-align: center;
+        position: relative;
+      }
+      .rt-arrow-line {
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent3), var(--accent));
+        position: relative;
+        overflow: hidden;
+      }
+      .rt-arrow-line::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: white;
+        animation: flow-anim 1.5s linear infinite;
+      }
+      @keyframes flow-anim {
+        0% {
+          left: -100%;
+        }
+        100% {
+          left: 200%;
+        }
+      }
+      .rt-arrow-head {
+        text-align: right;
+        font-size: 10px;
+        color: var(--accent);
+        margin-top: -2px;
+      }
+      .rt-arrow-time {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 3px;
+      }
+
+      /* ===== ARCHITECTURE LAYERS ===== */
+      .arch-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 32px;
+      }
+
+      .layer {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        position: relative;
+      }
+
+      .layer-badge {
+        position: absolute;
+        top: -12px;
+        left: 20px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 12px;
+        border-radius: 20px;
+        letter-spacing: 1px;
+      }
+
+      .layer-frontend .layer-badge {
+        background: var(--accent2);
+      }
+      .layer-api .layer-badge {
+        background: var(--accent);
+        color: #000;
+      }
+      .layer-ml .layer-badge {
+        background: var(--accent3);
+        color: #000;
+      }
+      .layer-db .layer-badge {
+        background: var(--accent4);
+        color: #000;
+      }
+
+      .components-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .component {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        transition: all 0.2s;
+        cursor: default;
+      }
+      .component:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px var(--glow);
+      }
+
+      .component-icon {
+        font-size: 20px;
+        margin-bottom: 6px;
+      }
+      .component-name {
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .component-tech {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--accent);
+        margin-top: 2px;
+      }
+      .component-desc {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 4px;
+        line-height: 1.4;
+      }
+
+      /* ===== DATA TRANSFER DIAGRAM ===== */
+      .transfer-section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 32px;
+      }
+
+      .transfer-visual {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+        gap: 0;
+        align-items: center;
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+
+      .transfer-box {
+        background: var(--bg2);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        min-width: 120px;
+      }
+
+      .transfer-box.frontend {
+        border: 2px solid var(--accent2);
+      }
+      .transfer-box.backend {
+        border: 2px solid var(--accent);
+      }
+      .transfer-box.mlbox {
+        border: 2px solid var(--accent3);
+      }
+      .transfer-box.database {
+        border: 2px solid var(--accent4);
+      }
+
+      .transfer-box-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      .transfer-box-name {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .transfer-box-tech {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        margin-top: 4px;
+      }
+      .transfer-box.frontend .transfer-box-tech {
+        color: var(--accent2);
+      }
+      .transfer-box.backend .transfer-box-tech {
+        color: var(--accent);
+      }
+      .transfer-box.mlbox .transfer-box-tech {
+        color: var(--accent3);
+      }
+      .transfer-box.database .transfer-box-tech {
+        color: var(--accent4);
+      }
+
+      .transfer-box ul {
+        list-style: none;
+        margin-top: 10px;
+        text-align: left;
+      }
+      .transfer-box ul li {
+        font-size: 10px;
+        color: var(--muted);
+        padding: 2px 0;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .transfer-box ul li::before {
+        content: "› ";
+        color: var(--accent);
+      }
+
+      .transfer-arrow {
+        text-align: center;
+        padding: 0 8px;
+        min-width: 80px;
+      }
+      .t-arrow-up,
+      .t-arrow-down {
+        font-size: 10px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+        white-space: nowrap;
+      }
+      .t-arrow-icon {
+        font-size: 20px;
+        color: var(--accent);
+        animation: arrow-bounce 1s ease-in-out infinite;
+      }
+      @keyframes arrow-bounce {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        50% {
+          transform: translateX(4px);
+        }
+      }
+      .t-arrow-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        color: var(--accent3);
+        margin-top: 3px;
+      }
+
+      /* ===== DATABASE SCHEMA ===== */
+      .schema-section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 32px;
+      }
+
+      .tables-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+
+      .db-table {
+        background: var(--bg2);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        transition: box-shadow 0.2s;
+      }
+      .db-table:hover {
+        box-shadow: 0 0 24px var(--glow);
+      }
+
+      .db-table-header {
+        padding: 10px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: "JetBrains Mono", monospace;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .db-table-header.users {
+        background: rgba(124, 58, 237, 0.3);
+        color: var(--accent2);
+      }
+      .db-table-header.attendance {
+        background: rgba(0, 212, 255, 0.2);
+        color: var(--accent);
+      }
+      .db-table-header.grades {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--accent3);
+      }
+      .db-table-header.risk {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--accent4);
+      }
+      .db-table-header.alerts {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--accent5);
+      }
+      .db-table-header.interventions {
+        background: rgba(99, 102, 241, 0.2);
+        color: #818cf8;
+      }
+
+      .db-field {
+        padding: 6px 14px;
+        font-size: 11px;
+        font-family: "JetBrains Mono", monospace;
+        color: var(--muted);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .db-field .pk {
+        color: var(--accent4);
+        font-size: 9px;
+        font-weight: 700;
+      }
+      .db-field .fk {
+        color: var(--accent);
+        font-size: 9px;
+      }
+      .db-field .type {
+        color: var(--accent3);
+        font-size: 9px;
+      }
+
+      /* ===== ROLES & ACCESS ===== */
+      .roles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .role-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        transition: all 0.2s;
+      }
+      .role-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .role-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .role-avatar {
+        font-size: 28px;
+      }
+      .role-name {
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .role-tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-top: 3px;
+        display: inline-block;
+      }
+
+      .role-student .role-tag {
+        background: rgba(124, 58, 237, 0.2);
+        color: var(--accent2);
+      }
+      .role-teacher .role-tag {
+        background: rgba(0, 212, 255, 0.2);
+        color: var(--accent);
+      }
+      .role-counselor .role-tag {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--accent3);
+      }
+      .role-admin .role-tag {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--accent4);
+      }
+
+      .role-actions {
+        list-style: none;
+      }
+      .role-actions li {
+        font-size: 11px;
+        color: var(--muted);
+        padding: 4px 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .role-actions li::before {
+        content: "→";
+        color: var(--accent3);
+        font-size: 10px;
+      }
+
+      /* ===== DAILY ATTENDANCE FLOW ===== */
+      .daily-flow {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 32px;
+      }
+
+      .timeline {
+        position: relative;
+        margin-top: 24px;
+        padding-left: 20px;
+      }
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(
+          180deg,
+          var(--accent),
+          var(--accent2),
+          var(--accent3),
+          var(--accent4)
+        );
+      }
+
+      .timeline-item {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 24px;
+        align-items: flex-start;
+        position: relative;
+      }
+      .timeline-dot {
+        position: absolute;
+        left: -24px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid var(--bg);
+        top: 5px;
+        flex-shrink: 0;
+      }
+
+      .timeline-time {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        min-width: 70px;
+        padding-top: 3px;
+      }
+
+      .timeline-content {
+        flex: 1;
+        background: var(--bg2);
+        border-radius: 8px;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+      }
+      .timeline-action {
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .timeline-detail {
+        font-size: 11px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+        line-height: 1.5;
+      }
+      .timeline-api {
+        margin-top: 6px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+        padding: 6px 10px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--accent3);
+      }
+
+      /* ===== ML SECTION ===== */
+      .ml-section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 32px;
+      }
+
+      .ml-pipeline {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .ml-step {
+        background: var(--bg2);
+        border-radius: 10px;
+        padding: 16px;
+        border: 1px solid var(--border);
+        text-align: center;
+        position: relative;
+      }
+      .ml-step::after {
+        content: "→";
+        position: absolute;
+        right: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--accent);
+        font-size: 14px;
+        z-index: 2;
+      }
+      .ml-step:last-child::after {
+        display: none;
+      }
+
+      .ml-step-num {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+      .ml-step-icon {
+        font-size: 24px;
+        margin-bottom: 6px;
+      }
+      .ml-step-name {
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .ml-step-detail {
+        font-size: 10px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .risk-levels {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+      .risk-level {
+        flex: 1;
+        min-width: 100px;
+        background: var(--bg2);
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+      }
+      .risk-level.low {
+        border: 2px solid var(--accent3);
+      }
+      .risk-level.medium {
+        border: 2px solid var(--accent4);
+      }
+      .risk-level.high {
+        border: 2px solid var(--accent5);
+      }
+
+      .risk-level-score {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .risk-level.low .risk-level-score {
+        color: var(--accent3);
+      }
+      .risk-level.medium .risk-level-score {
+        color: var(--accent4);
+      }
+      .risk-level.high .risk-level-score {
+        color: var(--accent5);
+      }
+
+      .risk-level-label {
+        font-size: 11px;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+      .risk-level-desc {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      /* Alert animation */
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .blink {
+        animation: blink 1s ease-in-out infinite;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>
+          Early Intervention System<br /><span>Architecture & Data Flow</span>
+        </h1>
+        <p>// REAL-TIME MONITORING · PREDICTIVE ANALYTICS · AUTOMATED ALERTS</p>
+      </div>
+
+      <!-- ===== REAL-TIME ATTENDANCE FLOW ===== -->
+      <div class="realtime-section">
+        <div class="flow-title">⚡ Real-Time Attendance Flow</div>
+        <div class="flow-subtitle">
+          What happens the moment a teacher marks attendance
+        </div>
+
+        <div class="rt-flow">
+          <div class="rt-step highlight-green">
+            <div class="rt-step-icon">👨‍🏫</div>
+            <div class="rt-step-label">Teacher</div>
+            <div class="rt-step-desc">Marks attendance<br />in React UI</div>
+          </div>
+
+          <div class="rt-arrow">
+            <div class="rt-arrow-line"></div>
+            <div class="rt-arrow-head">▶</div>
+            <div class="rt-arrow-time">~50ms<br />HTTP POST</div>
+          </div>
+
+          <div class="rt-step highlight-blue">
+            <div class="rt-step-icon">🔌</div>
+            <div class="rt-step-label">Django API</div>
+            <div class="rt-step-desc">
+              /api/attendance/<br />Validates & saves
+            </div>
+          </div>
+
+          <div class="rt-arrow">
+            <div class="rt-arrow-line"></div>
+            <div class="rt-arrow-head">▶</div>
+            <div class="rt-arrow-time">~10ms<br />SQL INSERT</div>
+          </div>
+
+          <div class="rt-step highlight-orange">
+            <div class="rt-step-icon">🗄️</div>
+            <div class="rt-step-label">PostgreSQL</div>
+            <div class="rt-step-desc">attendance_logs<br />table updated</div>
+          </div>
+
+          <div class="rt-arrow">
+            <div class="rt-arrow-line"></div>
+            <div class="rt-arrow-head">▶</div>
+            <div class="rt-arrow-time">~200ms<br />ML Trigger</div>
+          </div>
+
+          <div class="rt-step highlight-green">
+            <div class="rt-step-icon">🤖</div>
+            <div class="rt-step-label">ML Engine</div>
+            <div class="rt-step-desc">Recalculates<br />risk score</div>
+          </div>
+
+          <div class="rt-arrow">
+            <div class="rt-arrow-line"></div>
+            <div class="rt-arrow-head">▶</div>
+            <div class="rt-arrow-time">instant<br />WebSocket</div>
+          </div>
+
+          <div class="rt-step highlight-red">
+            <div class="rt-step-icon">🔔</div>
+            <div class="rt-step-label">Alert Sent</div>
+            <div class="rt-step-desc">Counselor gets<br />notification</div>
+          </div>
+
+          <div class="rt-arrow">
+            <div class="rt-arrow-line"></div>
+            <div class="rt-arrow-head">▶</div>
+            <div class="rt-arrow-time">~100ms<br />Dashboard</div>
+          </div>
+
+          <div class="rt-step highlight-purple">
+            <div class="rt-step-icon">📊</div>
+            <div class="rt-step-label">Dashboard</div>
+            <div class="rt-step-desc">Admin sees live<br />risk update</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== DAILY ATTENDANCE TIMELINE ===== -->
+      <div class="daily-flow">
+        <div class="section-title">Daily Attendance Lifecycle</div>
+        <div class="flow-title">📅 What Happens Day by Day</div>
+        <div class="flow-subtitle">
+          From teacher login to counselor action — the complete daily loop
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background: var(--accent3)"></div>
+            <div class="timeline-time">08:00 AM</div>
+            <div class="timeline-content">
+              <div class="timeline-action">
+                🧑‍🏫 Teacher Opens Attendance Panel
+              </div>
+              <div class="timeline-detail">
+                Teacher logs into React app → selects class → sees student list
+                loaded from DB
+              </div>
+              <div class="timeline-api">
+                GET /api/students/?class_id=CS-4A → returns [{id, name,
+                roll_no}, ...]
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background: var(--accent)"></div>
+            <div class="timeline-time">08:15 AM</div>
+            <div class="timeline-content">
+              <div class="timeline-action">
+                ✅ Teacher Marks Present / Absent
+              </div>
+              <div class="timeline-detail">
+                Teacher clicks Present/Absent for each student → hits Submit
+                button
+              </div>
+              <div class="timeline-api">
+                POST /api/attendance/ → {student_id: 5, date: "2024-12-10",
+                status: "absent", class_id: "CS-4A"}
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background: var(--accent4)"></div>
+            <div class="timeline-time">08:15 AM</div>
+            <div class="timeline-content">
+              <div class="timeline-action">🗄️ Django Saves to Database</div>
+              <div class="timeline-detail">
+                Backend receives POST → validates token → inserts row into
+                attendance_logs table
+              </div>
+              <div class="timeline-api">
+                INSERT INTO attendance_logs (student_id, date, status, class_id,
+                marked_by) VALUES (5, '2024-12-10', 'absent', 'CS-4A', 12)
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background: var(--accent2)"></div>
+            <div class="timeline-time">08:15 AM</div>
+            <div class="timeline-content">
+              <div class="timeline-action">
+                🤖 ML Risk Score Auto-Recalculates
+              </div>
+              <div class="timeline-detail">
+                After save, Django signals ML engine → fetches last 30-day
+                attendance + grades → runs RandomForest → updates risk_scores
+                table
+              </div>
+              <div class="timeline-api">
+                attendance_rate: 62% + grade_avg: 48 + incidents: 3 →
+                risk_score: 78 → category: "HIGH"
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background: var(--accent5)"></div>
+            <div class="timeline-time">08:15 AM</div>
+            <div class="timeline-content">
+              <div class="timeline-action" style="color: var(--accent5)">
+                🚨 Alert Auto-Triggered (if threshold crossed)
+              </div>
+              <div class="timeline-detail">
+                Risk score jumped from Medium to High → system creates alert
+                record → sends email to counselor + push notification to
+                dashboard
+              </div>
+              <div class="timeline-api">
+                INSERT INTO alerts (student_id, type, message, sent_to) VALUES
+                (5, 'HIGH_RISK', 'Attendance dropped to 62%', counselor_id=3)
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background: var(--accent3)"></div>
+            <div class="timeline-time">09:00 AM</div>
+            <div class="timeline-content">
+              <div class="timeline-action">
+                👩‍⚕️ Counselor Sees Alert on Dashboard
+              </div>
+              <div class="timeline-detail">
+                Counselor logs in → dashboard shows high-risk students → clicks
+                student profile → views full history → assigns intervention
+              </div>
+              <div class="timeline-api">
+                POST /api/interventions/ → {student_id: 5, action:
+                "counseling_session", scheduled: "2024-12-11"}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ARCHITECTURE LAYERS ===== -->
+      <div class="section-title">System Layers</div>
+
+      <div class="arch-grid">
+        <!-- Frontend Layer -->
+        <div class="layer layer-frontend">
+          <div class="layer-badge">LAYER 1 — FRONTEND</div>
+          <div
+            style="
+              margin-top: 8px;
+              font-size: 13px;
+              color: var(--muted);
+              margin-bottom: 4px;
+            ">
+            What the user sees in the browser
+          </div>
+          <div class="components-grid">
+            <div class="component">
+              <div class="component-icon">🖥️</div>
+              <div class="component-name">Student Dashboard</div>
+              <div class="component-tech">React.js</div>
+              <div class="component-desc">
+                Shows personal risk score, attendance chart, grade trend
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">👨‍🏫</div>
+              <div class="component-name">Attendance Panel</div>
+              <div class="component-tech">React.js</div>
+              <div class="component-desc">
+                Teacher marks daily attendance, submits to API
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">🔔</div>
+              <div class="component-name">Alert Center</div>
+              <div class="component-tech">WebSocket</div>
+              <div class="component-desc">
+                Live notifications pushed to counselor when risk rises
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">📊</div>
+              <div class="component-name">Admin Dashboard</div>
+              <div class="component-tech">Chart.js</div>
+              <div class="component-desc">
+                Live graphs, risk heatmaps, department overview
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">📝</div>
+              <div class="component-name">Self-Report Form</div>
+              <div class="component-tech">React Form</div>
+              <div class="component-desc">
+                Student submits stress/behavioral concern directly
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">🗂️</div>
+              <div class="component-name">Case Manager</div>
+              <div class="component-tech">React.js</div>
+              <div class="component-desc">
+                Counselor records interventions and follow-up notes
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Layer -->
+        <div class="layer layer-api">
+          <div class="layer-badge">LAYER 2 — BACKEND API</div>
+          <div
+            style="
+              margin-top: 8px;
+              font-size: 13px;
+              color: var(--muted);
+              margin-bottom: 4px;
+            ">
+            Django handles all logic, auth, and database communication
+          </div>
+          <div class="components-grid">
+            <div class="component">
+              <div class="component-icon">🔐</div>
+              <div class="component-name">Auth Service</div>
+              <div class="component-tech">JWT Token</div>
+              <div class="component-desc">
+                Login, role-based access, token verification
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">📡</div>
+              <div class="component-name">Attendance API</div>
+              <div class="component-tech">REST POST/GET</div>
+              <div class="component-desc">
+                /api/attendance/ — receives and stores daily records
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">📈</div>
+              <div class="component-name">Grades API</div>
+              <div class="component-tech">REST POST/GET</div>
+              <div class="component-desc">
+                /api/grades/ — receives exam/assignment results
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">⚡</div>
+              <div class="component-name">Risk Engine</div>
+              <div class="component-tech">Django Signals</div>
+              <div class="component-desc">
+                Auto-triggers ML calculation on new data save
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">🔔</div>
+              <div class="component-name">Alert Service</div>
+              <div class="component-tech">Celery + Email</div>
+              <div class="component-desc">
+                Sends notifications when risk threshold crossed
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">🔄</div>
+              <div class="component-name">WebSocket Server</div>
+              <div class="component-tech">Django Channels</div>
+              <div class="component-desc">
+                Pushes live risk updates to connected dashboards
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ML Layer -->
+        <div class="layer layer-ml">
+          <div class="layer-badge">LAYER 3 — ML ENGINE</div>
+          <div
+            style="
+              margin-top: 8px;
+              font-size: 13px;
+              color: var(--muted);
+              margin-bottom: 4px;
+            ">
+            Python Scikit-Learn model runs inside Django
+          </div>
+          <div class="components-grid">
+            <div class="component">
+              <div class="component-icon">📥</div>
+              <div class="component-name">Data Collector</div>
+              <div class="component-tech">Pandas</div>
+              <div class="component-desc">
+                Pulls last 30-day attendance, grades, incidents for student
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">⚙️</div>
+              <div class="component-name">Feature Builder</div>
+              <div class="component-tech">NumPy</div>
+              <div class="component-desc">
+                Calculates attendance %, grade avg, incident count
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">🌳</div>
+              <div class="component-name">Random Forest</div>
+              <div class="component-tech">Scikit-Learn</div>
+              <div class="component-desc">
+                Trained classifier predicts Low / Medium / High risk
+              </div>
+            </div>
+            <div class="component">
+              <div class="component-icon">💾</div>
+              <div class="component-name">Model Storage</div>
+              <div class="component-tech">Pickle (.pkl)</div>
+              <div class="component-desc">
+                Saved model loaded on startup, re-trained monthly
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px">
+            <div
+              style="
+                font-size: 12px;
+                color: var(--muted);
+                margin-bottom: 10px;
+                font-family: &quot;JetBrains Mono&quot;, monospace;
+              ">
+              RISK SCORE THRESHOLDS
+            </div>
+            <div class="risk-levels">
+              <div class="risk-level low">
+                <div class="risk-level-score">0–40</div>
+                <div class="risk-level-label">🟢 LOW RISK</div>
+                <div class="risk-level-desc">
+                  No action needed. Monitor weekly.
+                </div>
+              </div>
+              <div class="risk-level medium">
+                <div class="risk-level-score">41–70</div>
+                <div class="risk-level-label">🟡 MEDIUM RISK</div>
+                <div class="risk-level-desc">
+                  Counselor notified. Schedule check-in.
+                </div>
+              </div>
+              <div class="risk-level high">
+                <div class="risk-level-score">71–100</div>
+                <div
+                  class="risk-level-label"
+                  style="color: var(--accent5)"
+                  class="blink">
+                  🔴 HIGH RISK
+                </div>
+                <div class="risk-level-desc">
+                  Immediate alert. Auto-escalate.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Database Layer -->
+        <div class="layer layer-db">
+          <div class="layer-badge">LAYER 4 — DATABASE</div>
+          <div
+            style="
+              margin-top: 8px;
+              font-size: 13px;
+              color: var(--muted);
+              margin-bottom: 4px;
+            ">
+            PostgreSQL stores everything. Each action writes a record.
+          </div>
+          <div class="tables-grid">
+            <div class="db-table">
+              <div class="db-table-header users">👤 users</div>
+              <div class="db-field">id <span class="pk">PK</span></div>
+              <div class="db-field">name <span class="type">VARCHAR</span></div>
+              <div class="db-field">
+                email <span class="type">VARCHAR</span>
+              </div>
+              <div class="db-field">role <span class="type">ENUM</span></div>
+              <div class="db-field">
+                password_hash <span class="type">TEXT</span>
+              </div>
+            </div>
+
+            <div class="db-table">
+              <div class="db-table-header attendance">📋 attendance_logs</div>
+              <div class="db-field">id <span class="pk">PK</span></div>
+              <div class="db-field">
+                student_id <span class="fk">FK→users</span>
+              </div>
+              <div class="db-field">date <span class="type">DATE</span></div>
+              <div class="db-field">status <span class="type">ENUM</span></div>
+              <div class="db-field">
+                marked_by <span class="fk">FK→users</span>
+              </div>
+              <div class="db-field">
+                timestamp <span class="type">DATETIME</span>
+              </div>
+            </div>
+
+            <div class="db-table">
+              <div class="db-table-header grades">📝 grade_records</div>
+              <div class="db-field">id <span class="pk">PK</span></div>
+              <div class="db-field">
+                student_id <span class="fk">FK→users</span>
+              </div>
+              <div class="db-field">
+                subject <span class="type">VARCHAR</span>
+              </div>
+              <div class="db-field">score <span class="type">FLOAT</span></div>
+              <div class="db-field">
+                exam_type <span class="type">ENUM</span>
+              </div>
+              <div class="db-field">date <span class="type">DATE</span></div>
+            </div>
+
+            <div class="db-table">
+              <div class="db-table-header risk">⚠️ risk_scores</div>
+              <div class="db-field">id <span class="pk">PK</span></div>
+              <div class="db-field">
+                student_id <span class="fk">FK→users</span>
+              </div>
+              <div class="db-field">score <span class="type">FLOAT</span></div>
+              <div class="db-field">
+                category <span class="type">ENUM</span>
+              </div>
+              <div class="db-field">
+                calculated_at <span class="type">DATETIME</span>
+              </div>
+              <div class="db-field">
+                features_json <span class="type">JSON</span>
+              </div>
+            </div>
+
+            <div class="db-table">
+              <div class="db-table-header alerts">🔔 alerts</div>
+              <div class="db-field">id <span class="pk">PK</span></div>
+              <div class="db-field">
+                student_id <span class="fk">FK→users</span>
+              </div>
+              <div class="db-field">
+                sent_to <span class="fk">FK→users</span>
+              </div>
+              <div class="db-field">type <span class="type">VARCHAR</span></div>
+              <div class="db-field">message <span class="type">TEXT</span></div>
+              <div class="db-field">is_read <span class="type">BOOL</span></div>
+            </div>
+
+            <div class="db-table">
+              <div class="db-table-header interventions">🩺 interventions</div>
+              <div class="db-field">id <span class="pk">PK</span></div>
+              <div class="db-field">
+                student_id <span class="fk">FK→users</span>
+              </div>
+              <div class="db-field">
+                counselor_id <span class="fk">FK→users</span>
+              </div>
+              <div class="db-field">
+                action_type <span class="type">VARCHAR</span>
+              </div>
+              <div class="db-field">notes <span class="type">TEXT</span></div>
+              <div class="db-field">status <span class="type">ENUM</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== USER ROLES ===== -->
+      <div class="section-title">User Roles & What They See</div>
+      <div class="roles-grid">
+        <div class="role-card role-student">
+          <div class="role-header">
+            <div class="role-avatar">🎓</div>
+            <div>
+              <div class="role-name">Student</div>
+              <div class="role-tag">READ-ONLY (OWN DATA)</div>
+            </div>
+          </div>
+          <ul class="role-actions">
+            <li>View own attendance % and history</li>
+            <li>See personal risk score & trend</li>
+            <li>View grade performance chart</li>
+            <li>Submit self-report (stress/concern)</li>
+            <li>Receive personal alerts/tips</li>
+          </ul>
+        </div>
+
+        <div class="role-card role-teacher">
+          <div class="role-header">
+            <div class="role-avatar">👨‍🏫</div>
+            <div>
+              <div class="role-name">Teacher</div>
+              <div class="role-tag">WRITE — ATTENDANCE & GRADES</div>
+            </div>
+          </div>
+          <ul class="role-actions">
+            <li>Mark daily attendance for class</li>
+            <li>Enter exam / assignment grades</li>
+            <li>Submit behavioral incident reports</li>
+            <li>View class-level risk overview</li>
+            <li>Cannot see other teachers' classes</li>
+          </ul>
+        </div>
+
+        <div class="role-card role-counselor">
+          <div class="role-header">
+            <div class="role-avatar">👩‍⚕️</div>
+            <div>
+              <div class="role-name">Counselor</div>
+              <div class="role-tag">MANAGE — CASES & ALERTS</div>
+            </div>
+          </div>
+          <ul class="role-actions">
+            <li>Receive real-time risk alerts</li>
+            <li>View full student risk profile</li>
+            <li>Assign interventions & sessions</li>
+            <li>Record case notes & follow-ups</li>
+            <li>Escalate cases to admin</li>
+          </ul>
+        </div>
+
+        <div class="role-card role-admin">
+          <div class="role-header">
+            <div class="role-avatar">🛡️</div>
+            <div>
+              <div class="role-name">Admin / Management</div>
+              <div class="role-tag">FULL ACCESS — ALL DATA</div>
+            </div>
+          </div>
+          <ul class="role-actions">
+            <li>View full system dashboard</li>
+            <li>Manage users, roles, accounts</li>
+            <li>Set risk threshold values</li>
+            <li>Generate department reports</li>
+            <li>View ML model accuracy stats</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===== DATA TRANSFER FLOW ===== -->
+      <div class="transfer-section">
+        <div class="section-title">Complete Data Transfer Path</div>
+        <div class="flow-title">🔁 How Data Moves Through the System</div>
+
+        <div class="transfer-visual">
+          <div class="transfer-box frontend">
+            <div class="transfer-box-icon">💻</div>
+            <div class="transfer-box-name">React Frontend</div>
+            <div class="transfer-box-tech">Axios / Fetch API</div>
+            <ul>
+              <li>User action triggers</li>
+              <li>Form submit / button click</li>
+              <li>Sends JSON payload</li>
+              <li>Shows response in UI</li>
+            </ul>
+          </div>
+
+          <div class="transfer-arrow">
+            <div class="t-arrow-up">JSON + JWT</div>
+            <div class="t-arrow-icon">⟶</div>
+            <div class="t-arrow-down">REST API</div>
+            <div class="t-arrow-label">HTTPS</div>
+          </div>
+
+          <div class="transfer-box backend">
+            <div class="transfer-box-icon">⚙️</div>
+            <div class="transfer-box-name">Django Backend</div>
+            <div class="transfer-box-tech">Django REST Framework</div>
+            <ul>
+              <li>Validates JWT token</li>
+              <li>Checks user role</li>
+              <li>Runs business logic</li>
+              <li>Calls ML if needed</li>
+            </ul>
+          </div>
+
+          <div class="transfer-arrow">
+            <div class="t-arrow-up">Python call</div>
+            <div class="t-arrow-icon">⟶</div>
+            <div class="t-arrow-down">model.predict()</div>
+            <div class="t-arrow-label">IN-MEMORY</div>
+          </div>
+
+          <div class="transfer-box mlbox">
+            <div class="transfer-box-icon">🤖</div>
+            <div class="transfer-box-name">ML Model</div>
+            <div class="transfer-box-tech">Scikit-Learn .pkl</div>
+            <ul>
+              <li>Receives feature array</li>
+              <li>Returns risk score</li>
+              <li>Returns category</li>
+              <li>Result back to Django</li>
+            </ul>
+          </div>
+
+          <div class="transfer-arrow">
+            <div class="t-arrow-up">ORM Query</div>
+            <div class="t-arrow-icon">⟶</div>
+            <div class="t-arrow-down">SQL INSERT/SELECT</div>
+            <div class="t-arrow-label">TCP</div>
+          </div>
+
+          <div class="transfer-box database">
+            <div class="transfer-box-icon">🗄️</div>
+            <div class="transfer-box-name">PostgreSQL</div>
+            <div class="transfer-box-tech">Django ORM</div>
+            <ul>
+              <li>Stores all records</li>
+              <li>Updates risk_scores</li>
+              <li>Logs every action</li>
+              <li>Returns query results</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div
+        style="
+          text-align: center;
+          padding: 32px 0;
+          color: var(--muted);
+          font-family: &quot;JetBrains Mono&quot;, monospace;
+          font-size: 11px;
+          border-top: 1px solid var(--border);
+        ">
+        Early Intervention Model — System Architecture · Noor Fatima
+        F22BINFT1M01174 · IUB
+      </div>
+    </div>
+  </body>
+</html>
