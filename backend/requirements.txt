@@ -12,7 +12,7 @@ djangorestframework-simplejwt==5.3.0
 # WebSockets (real-time alerts)
 channels==4.0.0
 
-# PostgreSQL connector (install even if using SQLite now)
+# PostgreSQL connector 
 psycopg2-binary==2.9.9
 
 # Read .env file

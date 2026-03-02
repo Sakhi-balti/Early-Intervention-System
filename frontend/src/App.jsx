@@ -3,10 +3,11 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 import TeacherGrades from "./pages/TeacherGrades";
+import BehaviorIncidents from "./pages/BehaviorIncidents";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import StudentDashboard from "./pages/StudentDashboard";
+import StudentDashboard from "./pages/Student_Dashboard";
 import TeacherAttendance from "./pages/TeacherAttendance";
 
 import { CounselorDashboard } from "./pages/Dashboards";
@@ -50,6 +51,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          {/* Incidents */}
+          <Route
+            path="/incidents"
+            element={
+              <ProtectedRoute allowedRoles={["teacher"]}>
+                <BehaviorIncidents />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Counselor */}
           <Route
@@ -85,7 +95,7 @@ export default function App() {
                   color: "#ef4444",
                   fontSize: "18px",
                 }}>
-                🚫 You don't have permission to view this page.
+                You don't have permission to view this page.
               </div>
             }
           />

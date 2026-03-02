@@ -57,7 +57,7 @@ export function CounselorDashboard() {
               fontWeight: "800",
               margin: 0,
             }}>
-            🔔 Alerts & Cases
+            Alerts & Cases
           </h1>
           <p style={{ color: "#64748b", fontSize: "13px", marginTop: "6px" }}>
             {alerts.length} unread alert{alerts.length !== 1 ? "s" : ""}{" "}
@@ -107,7 +107,7 @@ export function CounselorDashboard() {
                       letterSpacing: "1px",
                       marginBottom: "6px",
                     }}>
-                    🚨 {alert.alert_type?.replace("_", " ")}
+                    {alert.alert_type?.replace("_", " ")}
                   </div>
                   <div
                     style={{
