@@ -7,7 +7,7 @@ import BehaviorIncidents from "./pages/BehaviorIncidents";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import StudentDashboard from "./pages/Student_Dashboard";
+import StudentDashboard from "./pages/StudentDashboard";
 import TeacherAttendance from "./pages/TeacherAttendance";
 
 import { CounselorDashboard } from "./pages/Dashboards";
