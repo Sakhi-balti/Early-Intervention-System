@@ -1,58 +1,40 @@
-
-
 # Early Intervention System
 
-A full-stack student early warning platform that helps schools detect at-risk students using attendance, grades, behavior incidents, and intervention history.
+Simple guide to run this project on your own machine.
 
-- **Backend:** Django + Django REST Framework + JWT auth
-- **Frontend:** React + Vite
-- **ML Engine:** Scikit-learn model for risk prediction
+## What this software is
 
----
-
-## 1) System Requirements
-
-### Required software
-
-- **Python 3.10+** (recommended: 3.11)
-- **Node.js 18+** and **npm 9+**
-- **Git**
-
-### Database options
-
-- **Default (easy): SQLite** (no setup needed)
-
-
-### Tested local ports
-
-- Backend API: `http://127.0.0.1:8000`
-- Frontend app: `http://localhost:5173`
+- Backend API: Django (`backend/`)
+- Frontend UI: React + Vite (`frontend/`)
+- ML scripts: risk model tools (`ml_engine/`)
 
 ---
 
-## 2) Project Structure
+## 1) Requirements
 
-```text
-Early-Intervention-System/
-├── backend/                # Django API
-├── frontend/               # React app (Vite)
-├── ml_engine/              # Model scripts + trained model/data
-├── System_Architecture/    
-└── README.md
-```
+Install these first:
+
+- Python 3.10+
+- Node.js 18+ and npm
+- Git
+
+Database:
+
+- Default: SQLite (no extra setup)
+- Optional: PostgreSQL
 
 ---
 
-## 3) Setup & Run (Local Machine)
-
-### Step A — Clone
+## 2) Download project
 
 ```bash
-git clone <this repository >
-open  Early-Intervention-System on VScode
+git clone <This-repo-url>
+cd Early-Intervention-System
 ```
 
-### Step B — Backend setup (Django)
+---
+
+## 3) Run backend (Django)
 
 ```bash
 cd backend
@@ -61,35 +43,34 @@ Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Run migrations and start backend:
+Optional: create `backend/.env`:
 
-```bash
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver
+```env
+SECRET_KEY=change-me
+DEBUG=True
+DB_ENGINE=sqlite
 ```
 
-Backend now runs at: `http://127.0.0.1:8000`
+Start backend:
 
-### Step C — Frontend setup (React)
+````bash
+python manage.py migrate
+python manage.py runserver
 
-Open a **new terminal**:
 
+## 4) Run frontend (React)
+Open a new terminal:
 ```bash
 cd frontend
 npm install
 npm run dev
-```
+````
 
-Frontend now runs at: `http://localhost:5173`
-
-> The frontend is preconfigured to call `http://127.0.0.1:8000/api`.
+Frontend URL: `http://localhost:5173`
 
 ---
 
-## 4) First-Time Admin User (recommended)
-
-Create a superuser so you can access Django admin and manage data:
+## 5) First admin user
 
 ```bash
 cd backend
@@ -97,36 +78,31 @@ Windows: .venv\Scripts\activate
 python manage.py createsuperuser
 ```
 
-Admin panel:
-
-- URL: `http://127.0.0.1:8000/admin/`
+Admin panel: `http://127.0.0.1:8000/admin/`
 
 ---
 
-## 5) How to Add Your Own Data
+## 6) Add your own data
 
-You can add data using either:
+You can add data in 2 ways:
 
-1. **Django Admin UI** (easiest for manual entry), or
-2. **API endpoints** (best for importing from another system/script).
+### A) Django admin (easy)
 
-### A) Using Django Admin
+1. Login to `/admin/`
+2. Add users (student, teacher, counselor, admin)
+3. Add attendance, grades, interventions
 
-1. Login at `/admin/`.
-2. Create users with correct roles (`student`, `teacher`, `counselor`, `admin`).
-3. Add attendance logs, grades, and interventions from respective models.
+### B) API
 
-### B) Using API
+Main endpoints:
 
-Main endpoints (all prefixed with `/api/`):
+- `POST /api/users/register/`
+- `POST /api/users/login/`
+- `POST /api/attendance/`
+- `POST /api/grades/`
+- `POST /api/interventions/`
 
-- `POST /users/register/` — create user
-- `POST /users/login/` — get JWT tokens
-- `POST /attendance/` — add attendance
-- `POST /grades/` — add grade
-- `POST /interventions/` — add intervention
-
-Use login token as:
+For protected endpoints use:
 
 ```http
 Authorization: Bearer <access_token>
@@ -134,44 +110,27 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 6) How to Clean / Reset the Database
+## 7) Reset/Clean database
 
-> Choose the method that matches your database.
-
-### Option A — Quick reset for SQLite (development)
+### SQLite full reset (local development)
 
 ```bash
 cd backend
 rm -f db.sqlite3
-find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
-find . -path "*/migrations/*.pyc" -delete
-python manage.py makemigrations
 python manage.py migrate
-```
-
-Then recreate admin user:
-
-```bash
 python manage.py createsuperuser
 ```
 
-### Option B — Keep schema but delete data only
+### Delete all data but keep schema
 
 ```bash
 cd backend
 python manage.py flush --no-input
 ```
 
-This removes table data but keeps migrations/schema.
+### PostgreSQL reset
 
-### Option C — PostgreSQL reset (manual)
-
-```sql
-DROP DATABASE early_intervention_db;
-CREATE DATABASE early_intervention_db;
-```
-
-Then run again:
+Drop and recreate your DB, then:
 
 ```bash
 cd backend
@@ -181,15 +140,7 @@ python manage.py createsuperuser
 
 ---
 
-## 7) ML Engine (Risk Model)
-
-Inside `ml_engine/`:
-
-- `generate_data.py` — generates synthetic training CSV
-- `train_model.py` — trains and saves model to `ml_engine/model/risk_model.pkl`
-- `predict.py` — inference helper used by backend
-
-To regenerate training data and retrain model:
+## 8) ML model commands
 
 ```bash
 cd ml_engine
@@ -198,30 +149,3 @@ python train_model.py
 ```
 
 ---
-
-## 8) Common Run Commands
-
-### Start backend
-
-```bash
-cd backend
- Windows: .venv\Scripts\activate
-python manage.py runserver
-```
-
-### Start frontend
-
-```bash
-cd frontend
-npm run dev
-```
-
-### Run backend checks
-
-```bash
-cd backend
-python manage.py check
-```
-
-
-
