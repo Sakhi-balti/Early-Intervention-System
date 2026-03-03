@@ -205,7 +205,7 @@ python train_model.py
 
 ```bash
 cd backend
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
+ Windows: .venv\Scripts\activate
 python manage.py runserver
 ```
 
@@ -223,24 +223,5 @@ cd backend
 python manage.py check
 ```
 
----
 
-## 9) Troubleshooting
 
-- **CORS issue in browser:** ensure frontend runs on `localhost:5173`.
-- **401 Unauthorized:** include JWT access token in `Authorization` header.
-- **Database errors:** confirm `.env` DB values and that migrations are applied.
-- **Frontend not loading API data:** ensure backend server is running on port 8000.
-
----
-
-## 10) Production Notes (Important)
-
-Before production deployment:
-
-- Set `DEBUG=False`
-- Use a strong `SECRET_KEY`
-- Restrict `ALLOWED_HOSTS`
-- Use PostgreSQL (not SQLite)
-- Configure a real email backend
-- Configure persistent channel layer (Redis) for WebSockets
