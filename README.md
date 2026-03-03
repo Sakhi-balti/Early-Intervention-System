@@ -21,7 +21,7 @@ A full-stack student early warning platform that helps schools detect at-risk st
 ### Database options
 
 - **Default (easy): SQLite** (no setup needed)
-- **Optional:** PostgreSQL 13+
+
 
 ### Tested local ports
 
@@ -37,7 +37,7 @@ Early-Intervention-System/
 ├── backend/                # Django API
 ├── frontend/               # React app (Vite)
 ├── ml_engine/              # Model scripts + trained model/data
-├── System_Architecture/    # Architecture HTML file
+├── System_Architecture/    
 └── README.md
 ```
 
@@ -48,8 +48,8 @@ Early-Intervention-System/
 ### Step A — Clone
 
 ```bash
-git clone <your-repo-url>
-cd Early-Intervention-System
+git clone <this repository >
+open  Early-Intervention-System on VScode
 ```
 
 ### Step B — Backend setup (Django)
@@ -57,26 +57,8 @@ cd Early-Intervention-System
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install --upgrade pip
+Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-Create a `.env` file in `backend/` (optional but recommended):
-
-```env
-SECRET_KEY=change-this-in-production
-DEBUG=True
-
-# Database selection: sqlite (default) or postgresql
-DB_ENGINE=sqlite
-
-# Only needed if DB_ENGINE=postgresql
-DB_NAME=early_intervention_db
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_HOST=localhost
-DB_PORT=5432
 ```
 
 Run migrations and start backend:
@@ -111,7 +93,7 @@ Create a superuser so you can access Django admin and manage data:
 
 ```bash
 cd backend
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
+Windows: .venv\Scripts\activate
 python manage.py createsuperuser
 ```
 
