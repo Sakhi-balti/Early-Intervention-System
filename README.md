@@ -1,14 +1,3 @@
-# Early Intervention System
-
-Simple guide to run this project on your own machine.
-
-## What this software is
-
-- Backend API: Django (`backend/`)
-- Frontend UI: React + Vite (`frontend/`)
-- ML scripts: risk model tools (`ml_engine/`)
-
----
 
 ## 1) Requirements
 
@@ -20,8 +9,8 @@ Install these first:
 
 Database:
 
-- Default: SQLite (no extra setup)
-- Optional: PostgreSQL
+ SQLite (no extra setup)
+
 
 ---
 
@@ -42,22 +31,13 @@ python -m venv .venv
 Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
-
-Optional: create `backend/.env`:
-
-```env
-SECRET_KEY=change-me
-DEBUG=True
-DB_ENGINE=sqlite
-```
-
 Start backend:
 
 ````bash
 python manage.py migrate
 python manage.py runserver
 
-
+`````
 ## 4) Run frontend (React)
 Open a new terminal:
 ```bash
@@ -104,11 +84,6 @@ Main endpoints:
 
 For protected endpoints use:
 
-```http
-Authorization: Bearer <access_token>
-```
-
----
 
 ## 7) Reset/Clean database
 
